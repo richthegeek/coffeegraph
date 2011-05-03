@@ -1,0 +1,89 @@
+
+<html> 
+<head> 
+	<title>--</title> 
+	<script type="text/javascript" src="jquery.min.js" ></script> 
+	<script type="text/javascript" src="raphael-min.js" ></script> 
+	<script type="text/javascript" src="Three.js" ></script> 
+ 
+	<script type='text/javascript' src='compiled/class.eventdriver.js'></script><script type='text/javascript' src='compiled/class.graph.js'></script><script type='text/javascript' src='compiled/class.node.js'></script><script type='text/javascript' src='compiled/class.edge.js'></script><script type='text/javascript' src='compiled/class.spring.js'></script><script type='text/javascript' src='compiled/class.kamada.js'></script><script type='text/javascript' src='compiled/class.siman.js'></script><script type='text/javascript' src='compiled/class.render2d.js'></script><script type='text/javascript' src='compiled/class.render3d.js'></script><script type='text/javascript' src='compiled/class.energy.js'></script><script type='text/javascript' src='compiled/class.linegraph.js'></script><script type='text/javascript' src='compiled/class.testing.js'></script>	<script type="text/javascript" src="index.js"></script> 
+	<script type="text/javascript" src="interface.js"></script> 
+	<link rel="stylesheet" href="style.css" /> 
+</head> 
+<body> 
+ 
+<div id="toolbar" > 
+	<ul> 
+		<li class='super'> 
+			<img src='images/icons/plus.png' /><span>create</span> 
+			<ul> 
+				<li fn='add_random_edge'><img src='images/icons/layer-shape-line.png' /><span>random edge</span></li> 
+				<li fn='add_random_node'><img src='images/icons/node.png' /><span>random node</span></li> 
+				<li fn='cliqueify'><img src='images/icons/wand.png' /><span>connect all</span></li> 
+			</ul> 
+		</li> 
+		
+		<li class='super'> 
+			<img src='images/icons/cross.png' /><span>delete</span> 
+			<ul> 
+				<li fn='delete_random_edge'><img src='images/icons/layer-shape-line.png' /><span>random edge</span></li> 
+				<li fn='delete_random_node'><img src='images/icons/node.png' /><span>random node</span></li> 
+				<li fn='clear_graph'><img src='images/icons/broom.png' /><span>all edges &amp; nodes</span></li> 
+			</ul> 
+		</li> 
+	</ul> 
+	<ul> 
+		<li fn='toggle_2d' class='toggle_2d'><img src='images/icons/layer.png' /><span>2D mode</span></li> 
+		<li fn='toggle_3d' class='toggle_3d'><img src='images/icons/ice.png' /><span>3D mode</span></li> 
+		<li fn='toggle_pause' class='toggle_pause'> 
+			<img src='images/icons/control-pause.png' class='pause' /> 
+			<img src='images/icons/control.png' class='play' /> 
+			<span class='pause'>Pause</span> 
+			<span class='play'>Continue</span> 
+		</li> 
+		<li fn='data_reset'><img src='images/icons/arrow-circle-double.png' /><span>Redraw</span></li> 
+		<li fn='toggle_slow' class='toggle_slow'><img src='images/icons/clock-select.png' /><span>Slow</span></li> 
+	</ul> 
+	<ul> 
+		<li fn='toggle_spring' class='toggle_spring'><img src='images/icons/magnet.png' /><span>Spring (FR)</span></li> 
+		<li fn='toggle_kamada' class='toggle_kamada'><img src='images/icons/sum.png' /><span>Kamada-Kawai</span></li> 
+	</ul> 
+	<ul> 
+		<li class='super'> 
+			<img src='images/icons/edit-mathematics.png' /><span>wizards</span> 
+			<ul> 
+				<li fn='data_loop'><img src='images/icons/plus-white.png' /><span>Loop</span></li> 
+				<li fn='data_grid'><img src='images/icons/plus-white.png' /><span>2D grid</span></li> 
+				<li fn='data_grid_3d'><img src='images/icons/plus-white.png' /><span>3D grid</span></li> 
+				<li fn='data_cube'><img src='images/icons/plus-white.png' /><span>Cube</span></li> 
+				<li fn='data_clique'><img src='images/icons/plus-white.png' /><span>Clique</span></li> 
+ 
+			
+			</ul> 
+		</li> 
+	</ul> 
+</div> 
+<div id="canvas"></div> 
+ 
+<div id="iteration">0</div> 
+ 
+<ul id="sidebar"> 
+	<li class='closed'> 
+		<b>Import &amp; Export graph</b> 
+		<div id="imex"> 
+			<textarea name="graph_structure"></textarea> 
+			<select name="data_type"> 
+				<option value="JSON" selected>JSON</option> 
+				<option value="Dot">Dot</option> 
+				<option value="GraphML">GraphML</option> 
+				<option value="GXL">GXL</option> 
+ 
+			</select> 
+			<input type="submit" name="export" value="export" class="export-button" /> 
+			<input type="submit" name="import" value="import" class="import-button" /> 
+		</div> 
+	</li> 
+</ul> 
+ 
+</body> 
+</html> 
