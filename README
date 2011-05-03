@@ -1,0 +1,5 @@
+A bunch of code that implements the Kamada-Kawai and Fruchterman-Reingold graph-layout functions in 2D and 3D.
+
+Source is the coffee files, compiled are in raw javascript. See compiled.html to actually run it. Does not include the image files used in the GUI.cd '/home/rich/programming/cofoo/images'
+
+It can be seen online at http://www.nvoice.co.uk/cofoo/index.php
