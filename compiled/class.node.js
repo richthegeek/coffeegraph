@@ -14,9 +14,6 @@
       this.nodes = [];
       this.edges = [];
     }
-    Node.prototype.nodelist = function() {
-      return this.nodes;
-    };
     Node.prototype.reset_position = function() {
       var _ref;
       return _ref = [Math.random() * 3, Math.random() * 3, Math.random() * 3], this.x = _ref[0], this.y = _ref[1], this.z = _ref[2], _ref;

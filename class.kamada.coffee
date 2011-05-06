@@ -1,12 +1,15 @@
 class KamadaKawai extends Graph
 
-	# this algorithm only has one gear; GO!!!
-	layout: (iterations, @infinite = false) ->
-		if $? then $("#sidebar li b:contains('energy')").click()
+	constructor: (graph) ->
+		@graph = graph
+		@paths = {}
+		@springs = {}
 
+	# this algorithm only has one gear; GO!!!
+	prepare: (iterations, @infinite = false) ->
 		# scale graph by graph-size..
-		s = Math.sqrt(Math.sqrt(@nodes.length))
-		[n.x, n.y, n.z] = [n.x * s, n.y * s, n.z * s] for n in @nodes
+		# s = Math.sqrt(Math.sqrt(@graph.nodes.length))
+		# [n.x, n.y, n.z] = [n.x * s, n.y * s, n.z * s] for n in @graph.nodes
 
 		# compute shortest paths (O(n^3))
 		@shortest_paths()
@@ -19,7 +22,7 @@ class KamadaKawai extends Graph
 		# get first p/delta_p
 		@delta_p = -Infinity
 		@partials = {}
-		for n in @nodes
+		for n in @graph.nodes
 			do(n) ->
 			@partials[n.name] = @compute_partial_derivatives(n)
 			delta = @calculate_delta(@partials[n.name])
@@ -29,48 +32,58 @@ class KamadaKawai extends Graph
 				@delta_p = delta
 		
 		@last_energy = Infinity
-		# @main() while not @done(true)
-		@iteration = 0
-		@it = document.getElementById('iteration')
-		
-		if @infinite
-			@inf_loop(@infinite)
-		else
-			@main() for i in [1..iterations]
+
 
 	update_springs: () ->
 		# compute l and k (springs and distances?) (O(n^2))
 		@springs = {}
-		@springs[u.name] = {} for u in @nodes
+		@springs[u.name] = {} for u in @graph.nodes
 
-		for i, u of @nodes
+		for i, u of @graph.nodes
 			do(i,u) ->
-			for v in @nodes[++i..] # yes, i know, horrible look
+			for v in @graph.nodes[++i..] # yes, i know, horrible look
 				do(u,v) ->
 				dij = @paths[u.name][v.name]
 				if dij == Infinity then return false
 				@springs[u.name][v.name] = @springs[v.name][u.name] = @k / (dij*dij)	
 
-	inf_loop: (t) ->
-		# if not @done(true)
-		@main()
-		# console.log "loop"		
-		
-		@render.draw()
-		@it.innerHTML = @iteration
 
-		f = () => @inf_loop(t)
-		@loop = setTimeout( f, t )
+	# using the Floyd-Warshall algorithm 'cos I'm hardcore like that
+	# ported from networkX code
+	# O(n2) + O(n3) - luckily only run once
+	# tested + working on a cube
+	shortest_paths: ->
+		@paths = {}
 
-	main: () ->
-		if @paused or @render.dragging
+		# initialisation
+		for u in @nodes
+			do(u) ->
+			@paths[u.name] = {}
+			@paths[u.name][v.name] = Infinity for v in @graph.nodes # distance to nodes in general = Inf (calculated in cube loop)
+			@paths[u.name][v.name] = 1 for v in u.nodes # distance to nodes directly connected to u = 1
+			@paths[u.name][u.name] = 0 # distance to self = 0
+
+		# here comes the paaaiiinnn	
+		for w in @nodes
+			for u in @nodes when w != u
+				for v in @nodes when (v != u) and (v != w)
+					@paths[u.name][v.name] = Math.min(@paths[u.name][v.name], (@paths[u.name][w.name] + @paths[w.name][v.name]))
+
+		return @paths
+
+	iterate: () ->
+		if @graph.nodes.length == 0
 			return
-
-		@iteration++
+	
+		# adds 2n to iteration, could probably be improved... ensures we have springs and paths
+		for n in @graph.nodes
+			if (not @paths) or (not @springs) or (not @partials) or (not @paths[n.name]?) or (not @springs[n.name]?) or (not @partials[n.name])
+				@prepare()
+				break
 		
 		# update p_partials - partials from each each node to p
 		@p_partials = {}
-		@p_partials[n.name] = @compute_partial_derivative(n, @p) for n in @nodes
+		@p_partials[n.name] = @compute_partial_derivative(n, @p) for n in @graph.nodes
 
 		# compute differentials and move candidate node about
 		@inner_loop()
@@ -82,15 +95,14 @@ class KamadaKawai extends Graph
 		# best approximation of do-while possible
 		i = 0
 		@last_local_energy = Infinity
-		while i < 100 and not @done(false)
-			do() ->
+		while i < 300 and not @done(false)
 			i++
 
 			# compute elements of jacobian
 			mat = { xx: 0, yy: 0, xy: 0, yx: 0}
 			dim = ['x','y']
 			
-			if @is_3d
+			if @graph.is_3d
 				mat[a] = 0 for a in [ 'zz', 'xz', 'xz', 'yz', 'zy' ]
 				dim.push 'z'
 
@@ -98,7 +110,7 @@ class KamadaKawai extends Graph
 			pat = @paths[@p.name]
 
 			d = {}
-			for n in @nodes when not (n is @p)
+			for n in @graph.nodes when not (n is @p)
 				do() ->
 				[d2, d.x, d.y, d.z] = @distance(@p, n)
 
@@ -124,7 +136,7 @@ class KamadaKawai extends Graph
 
 	select_new_p: () ->
 		op = @p
-		for n in @nodes
+		for n in @graph.nodes
 			do(n) ->
 			odp = @p_partials[n.name]
 			opp = @compute_partial_derivative(n, op)
@@ -141,7 +153,7 @@ class KamadaKawai extends Graph
 
 	
 	linear_solver: (mat, rhs) ->
-		if @is_3d
+		if @graph.is_3d
 			[c1, c2, c3] = [ (mat.yy * mat.zz - mat.yz * mat.yz), (mat.xy * mat.zz - mat.yz * mat.xz), (mat.xy * mat.yz - mat.yy * mat.xz) ]
 
 			denom = 1 / (mat.xx * c1 - mat.xy * c2 + mat.xz * c3)
@@ -180,12 +192,12 @@ class KamadaKawai extends Graph
 		result = { x: 0, y: 0, z:0 }
 		add_results = (a,b) -> (a.x += b.x; a.y += b.y; a.z += b.z; return a)
 
-		result = add_results( result, @compute_partial_derivative(m,i) ) for i in @nodes
+		result = add_results( result, @compute_partial_derivative(m,i) ) for i in @graph.nodes
 		return result
 
 
 	calculate_delta: (partial) ->
-		if @is_3d
+		if @graph.is_3d
 			return Math.sqrt(partial.x*partial.x + partial.y*partial.y + partial.z*partial.z)
 		return Math.sqrt(partial.x*partial.x + partial.y*partial.y)
 

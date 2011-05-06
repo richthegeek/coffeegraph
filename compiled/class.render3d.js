@@ -23,7 +23,6 @@
       if (canvas) {
         this.set_canvas(canvas);
       }
-      this.graph.render = this;
       this.graph.is_3d = true;
       this.data = {
         radius: 600,

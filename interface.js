@@ -40,7 +40,7 @@ $( function()
 				w3d = true
 			}
 
-			t.graph[fn].call(t.graph, data)
+			t.graph.format[fn](data)
 
 			if( w3d ) t.toggle_3d()
 
@@ -49,7 +49,7 @@ $( function()
 		{
 			fn = "as" + format
 
-			$("#imex textarea").val( t.graph[fn].call(t.graph) )
+			$("#imex textarea").val( t.graph.format[fn]() )
 		}
 	})
 })
@@ -70,8 +70,8 @@ function register_graph(t, fn, canvas, frameskip)
 
 	f = function(i)
 	{	
-		if(t.render.paused) i += Math.round(Math.random() * 100)
-		if( i % this.frameskip || t.paused ) return;
+		if(t.graph.paused) i += Math.round(Math.random() * 100)
+		if( i % this.frameskip || t.graph.paused ) return;
 
 		if(typeof(t.graph) == "undefined")
 			return;
@@ -119,5 +119,5 @@ function register_graph(t, fn, canvas, frameskip)
 	l.frameskip = frameskip
 
 	t.graphs.push([f,l])
-	// t.bind('iteration', f, l)
+	t.graph.bind('iteration', f, l)
 }

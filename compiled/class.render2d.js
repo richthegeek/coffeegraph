@@ -1,21 +1,11 @@
 (function() {
   var Render2D;
-  var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) {
-    for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; }
-    function ctor() { this.constructor = child; }
-    ctor.prototype = parent.prototype;
-    child.prototype = new ctor;
-    child.__super__ = parent.prototype;
-    return child;
-  };
   Render2D = (function() {
-    __extends(Render2D, EventDriver);
     function Render2D(canvas, graph) {
       this.graph = graph;
       if (canvas) {
         this.set_canvas(canvas);
       }
-      this.graph.render = this;
       this.graph.is_3d = false;
       this.styles = {};
       this.styles.node = {
@@ -51,9 +41,6 @@
         opacity: 0.5,
         r: 10
       };
-      this.bind('resize', this.resize);
-      this.bind('delete_edge', this.delete_element);
-      this.bind('delete_node', this.delete_element);
     }
     Render2D.prototype.set_canvas = function(canvas) {
       if (typeof canvas === 'string') {
@@ -154,6 +141,12 @@
       (_ref = edge.element) != null ? _ref : edge.element = this.canvas.path().attr(this.styles.edge);
       return edge;
     };
+    Render2D.prototype.delete_node = function(n) {
+      return this.delete_element(n);
+    };
+    Render2D.prototype.delete_edge = function(e) {
+      return this.delete_edge(e);
+    };
     Render2D.prototype.delete_element = function(el) {
       if ((el.element != null) && (el.element.remove != null)) {
         el.element.remove();
@@ -163,14 +156,17 @@
       }
     };
     Render2D.prototype.hover_start = function(o) {
-      if ((this.dragging != null) && o.element.data.name !== this.dragging.data.name) {
+      if (!(o.element != null)) {
+        this.draw_node(o);
+      }
+      if ((this.graph.dragging != null) && (this.graph.dragging.data != null) && (o.element != null) && (o.element.data != null) && o.element.data.name !== this.graph.dragging.data.name) {
         this.hover = o;
-        if (this.graph.connected(o.element.data, this.dragging.data)) {
+        if (this.graph.connected(o.element.data, this.graph.dragging.data)) {
           return o.element.attr(this.styles.drag_over_break);
         } else {
           return o.element.attr(this.styles.drag_over);
         }
-      } else if (!(this.dragging != null) && !this.dragging) {
+      } else if (!(this.graph.dragging != null) && !this.graph.dragging) {
         return o.element.attr(this.styles.hover);
       }
     };
@@ -182,8 +178,8 @@
       this.ox = this.attr("cx");
       this.oy = this.attr("cy");
       this.attr(this.render.styles.dragging);
-      this.render.paused = true;
-      return this.render.dragging = this;
+      this.render.graph.paused = true;
+      return this.render.graph.dragging = this;
     };
     Render2D.prototype.drag_move = function(dx, dy) {
       var x, y, _ref;
@@ -214,9 +210,9 @@
         }
       }
       if (!((this.render.fpaused != null) && this.render.fpaused)) {
-        this.render.paused = null;
+        this.render.graph.paused = null;
       }
-      this.render.dragging = null;
+      this.render.graph.dragging = null;
       return this.attr(this.render.styles.node);
     };
     return Render2D;

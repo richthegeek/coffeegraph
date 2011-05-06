@@ -3,7 +3,6 @@ class Render3D extends EventDriver
 	constructor: (canvas, @graph) ->
 		if canvas then @set_canvas(canvas)
 
-		@graph.render = this
 		@graph.is_3d = true
 
 		@data = { radius: 600, t: 45, ot: 45, p: 45, op: 45, ox: 0, oy: 0, oe: false }

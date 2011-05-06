@@ -1,88 +1,51 @@
-class Spring extends Graph
-	constructor: () ->
+# Implements the Fruchterman-Reingold algorithm in 2D & 3D
+#
+# The algorithm models the graph as a spring network.
+# This implementation is undirected & unweighted.
+class Spring
+	constructor: (graph) ->
+		@graph = graph
 		@k = 2 # currently ignored from @iterate - related to number of nodes
 		@m = 0.01 # multiplier for forces in @apply
 		@d = 0.5 # max/min node movement
 		@r = 10 # radius at which nodes affect each other in repulsion
-		@r2 = 100
-		@iterations = 500
-		@iteration = 0
-		@is_3d = false
-		@it = document.getElementById('iteration')
+		@r2 = @r * @r # calculate this here (optimisation)
 
 		# experimental
 		@attract_scale = 1 # this * n = last frame at which attraction is dampened
 
-	layout: (iterations, @infinite = false) ->
+	prepare: () ->
 		@iteration = 0
-		@trigger('layout_start')
 		
-		iterations ?= @iterations
-		if not @infinite
-			i = 0
-			@loop = false
-			@iterate() while i++ < iterations
-
-		else
-			if typeof @infinite != 'number' or @infinite < 1
-				@infinite = 40 # 25 fps
-			clearTimeout(@loop)
-			clearInterval(@loop)
-			@loop = setTimeout( @iterate, @infinite )
-
-		@trigger('layout_end')
-
 	iterate: () =>
-		# only do something if it's not paused
-		if not @render.paused and not @render.dragging
-			# experimental
-			# this modifies the spring constant so it is related to how many nodes there are.
-			# 	less nodes = higher constant.
-			# 	effectively reduces scale of graph as it gets larger.
-			@k = 8 / Math.log(@nodes.length)
-			@k2 = @k * @k
+		# experimental
+		# this modifies the spring constant so it is related to how many nodes there are.
+		# 	less nodes = higher constant.
+		# 	effectively reduces scale of graph as it gets larger.
+		@k = 8 / Math.log(@graph.nodes.length)
+		@k2 = @k * @k
+		# experimental p2 - reduces attraction in early stages to encourage big bang
+		@sqrt_nl_as = Math.sqrt( @graph.nodes.length ) * @attract_scale
+		
+		
+		# speeds up the iteration by reducing number of ifs from n to 1 on this choice
+		@dist = (if @graph.is_3d then @graph.distance_3d else @graph.distance_2d)
+		
+		# for each pair of nodes, repulse
+		for i in [0...@graph.nodes.length]
+			do (i) =>
+			@repulse @graph.nodes[i], @graph.nodes[j] for j in [(i+1)...@graph.nodes.length]
 
-			# experimental p2 - reduces attraction in early stages to encourage big bang
-			@sqrt_nl_as = Math.sqrt( @nodes.length ) * @attract_scale
-			
-			if @is_3d
-				@dist = @distance_3d
-			else
-				@dist = @distance_2d
+		# for each edge, attract
+		@attract edge.source, edge.target for edge in @graph.edges
 
-			@iteration++
+		# apply calculated forces for this iteration
+		@graph.last_energy = {sum: 0, abs: 0}
+		(to = @apply(node); @graph.last_energy.sum += to; @graph.last_energy.abs += Math.abs(to)) for node in @graph.nodes
+		
+		return true
 
-			# for each pair of nodes, repulse
-			for i in [0...@nodes.length]
-				do (i) =>
-				@repulse @nodes[i], @nodes[j] for j in [(i+1)...@nodes.length]
-
-			# for each edge, attract
-			@attract edge.source, edge.target for edge in @edges
-
-			# apply calculated forces for this iteration
-			s = {sum: 0, abs: 0}
-			(to = @apply(node); s.sum += to; s.abs += Math.abs(to)) for node in @nodes
-			@last_energy = s
-
-		# update iteration counter view
-		@it.innerHTML = @iteration
-
-		# trigger the renderer (assuming the renderer has requested to be triggered on each iteration)
-		@trigger('iteration', @iteration)
-		@render.trigger('iteration', @iteration )
-
-		# if it's looping infinitely, loop.
-		if @loop
-		 	if not @slowed and not @paused
-		 		t = 10
-		 	else if (@slowed? and @slowed)
-		 		t = 50 * Math.log(@nodes.length)
-		 	else if (@paused? and @paused)
-		 		t = 50
-		 	@loop = setTimeout( @iterate, t )
-
-
+	# Coulomb repulsion
 	repulse: (n1, n2) ->
 		[ d2, dx, dy, dz] = @dist n1, n2
 
@@ -98,17 +61,16 @@ class Spring extends Graph
 			n2.apply_plus( dx, dy, dz )
 			n1.apply_minus( dx, dy, dz )
 
+	# Hooke attraction
 	attract: (n1, n2) ->
 		[ d2, dx, dy, dz ] = @dist n1, n2
 
-		# (d2-k)/k = d2/k - 1, skip the one
 		f  = d2 / @k
 
 		# experimental
 		# in initial iterations (0..attract_scale), slowly introduce attraction
-
-		if @iteration < @sqrt_nl_as
-			f *= @iteration / @sqrt_nl_as
+		if @graph.iteration < @sqrt_nl_as
+			f *= @graph.iteration / @sqrt_nl_as
 
 		# n1+, n2-
 		dx *= f
@@ -117,6 +79,7 @@ class Spring extends Graph
 		n1.apply_plus( dx, dy, dz )
 		n2.apply_minus( dx, dy, dz )
 
+	# apply the forces from this iteration
 	apply: (node) ->
 		# add onto each dimension the force acting on that dimensions multiplied by
 		# the force multiplier @m and limited by the force limiter @d
@@ -131,8 +94,8 @@ class Spring extends Graph
 		node.reset_forces()
 		return (x + y + z) / 3
 
-
+	# return a number no less than l and no higher than h, returning m when possible
 	between: (l, m, h) ->
-		return if l > m then l else (if m > h then h else m )
+		return if l > m then l else (if m > h then h else m)
 
 this.Spring = Spring

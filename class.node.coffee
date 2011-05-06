@@ -5,8 +5,6 @@ class Node
 		@reset_forces()
 		@nodes = []
 		@edges = []
-
-	nodelist: () -> @nodes
 			
 	reset_position: ->
 		[ @x, @y, @z ] = [ Math.random() * 3, Math.random() * 3, Math.random() * 3 ]

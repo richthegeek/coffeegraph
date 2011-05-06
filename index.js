@@ -6,7 +6,7 @@ var inf = function()
 {
 
 	t = new Testing()
-	t.canvas = 'canvas'
+	t.graph.render.canvas = 'canvas'
 	
 	t.toggle_spring()
 	t.toggle_2d()
@@ -16,6 +16,8 @@ var inf = function()
 	// t.data_grid_3d(5,5,5)
 	// t.data_cube()
 	// t.data_clique(5)
+
+	t.data_kneser(5,2)
 
 	f = function()
 	{
@@ -33,20 +35,8 @@ var inf = function()
 		register_graph(t, 'fps', id4, 10)		
 	}
 	setTimeout(f,100)
-
-
-	t.render.bind("iteration", function( i )
-	{
-		if(t.graph.nodes.length == 0) return;
-		if(i > 1 && i % 10) return;
-		if(i > 500) return;
-		
-		$.post( "draw.php", { graph: t.graph.asJSON(), i: i } )
-	})
 	
-
-	
-	t.loop_indefinitely(null, 10, 10)
+	t.graph.layout.loop()
 }
 
 $(function ()

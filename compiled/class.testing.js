@@ -1,18 +1,11 @@
 (function() {
   var Testing;
-  var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) {
-    for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; }
-    function ctor() { this.constructor = child; }
-    ctor.prototype = parent.prototype;
-    child.prototype = new ctor;
-    child.__super__ = parent.prototype;
-    return child;
-  }, __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
   Testing = (function() {
-    __extends(Testing, EventDriver);
     Testing.detect = false;
     function Testing() {
       this.graphs = [];
+      this.graph = new Graph();
     }
     Testing.prototype.update_graphs = function(i) {
       var g, _i, _len, _ref, _results;
@@ -28,160 +21,69 @@
       return _results;
     };
     Testing.prototype.algorithm = function(algo) {
-      var f, jso, t;
       this.algo = algo;
-      if ((this.graph != null) && (this.graph.nodes != null) && this.graph.nodes.length > 0) {
-        jso = this.graph.asJSON(true);
-        t = this.graph.is_3d.valueOf();
-      }
-      switch (this.algo) {
-        case 'spring':
-          this.graph = new Spring();
-          break;
-        case 'kamada':
-          this.graph = new KamadaKawai();
-          break;
-        case 'siman':
-          this.graph = new SimulatedAnnealing();
-          break;
-        default:
-          alert("not a valid algorithm choice :(");
-      }
-      if (jso != null) {
-        this.graph.fromJSON(jso);
-        console.log(t);
-        if (t === true) {
-          f = __bind(function() {
-            return this.toggle_3d();
-          }, this);
-        } else {
-          f = __bind(function() {
-            return this.toggle_2d();
-          }, this);
-        }
-        setTimeout(f, 100);
-      }
-      this.graph.unbind('iteration');
-      return this.graph.bind('iteration', this.update_graphs, this);
+      return this.graph.layout.select(this.algo);
     };
-    Testing.prototype.renderer = function(name) {
-      var e, n, _i, _j, _len, _len2, _ref, _ref2;
-      if ((!(this.canvas != null)) || (!(this.graph != null))) {
-        return alert('no canvas and/or algorithm chosen...');
+    Testing.prototype.renderer = function(rendermode) {
+      this.rendermode = rendermode;
+      if (this.graph.render.projector != null) {
+        $(this.graph.render.projector.canvas_dom).empty();
       }
-      if (this.render != null) {
-        $(this.render.canvas_dom).empty();
-        if ((this.looping != null) && this.looping) {
-          clearInterval(this.render.loop);
-          clearTimeout(this.render.loop);
-          this.render.loop = false;
-          this.graph.loop = false;
-        }
-        this.render.events = this.render.contexts = {};
-        if (this.detect) {
-          this.detect_resize();
-        }
-        _ref = this.graph.nodes;
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          n = _ref[_i];
-          delete n.element;
-        }
-        _ref2 = this.graph.edges;
-        for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
-          e = _ref2[_j];
-          delete e.element;
-        }
-      }
-      switch (name) {
-        case '2d':
-          this.render = new Render2D(this.canvas, this.graph);
-          break;
-        case 'raphael':
-          this.render = new Render2D(this.canvas, this.graph);
-          break;
-        case '3d':
-          this.render = new Render3D(this.canvas, this.graph);
-          break;
-        case 'three':
-          this.render = new Render3D(this.canvas, this.graph);
-          break;
-        default:
-          alert('not a valid renderer choice :(');
-      }
+      this.graph.render.select(this.rendermode);
       this.toggle_slow(false);
-      this.toggle_pause(false);
-      this.graph.iteration = 0;
-      return this.graph.bind('iteration', this.update_graphs);
+      return this.toggle_pause(false);
     };
     Testing.prototype.detect_resize = function() {
       this.detect = true;
       return document.body.onresize = __bind(function() {
-        return this.render.trigger("resize");
+        return this.graph.trigger("resize");
       }, this);
     };
     Testing.prototype.toggle_slow = function(swap) {
       if (swap == null) {
         swap = true;
       }
-      if (!(this.slowed != null)) {
-        this.slowed = false;
+      if (!(this.graph.slowed != null)) {
+        this.graph.slowed = false;
       }
       if (!swap) {
-        this.slowed = (this.slowed ? false : true);
+        this.graph.slowed = !this.graph.slowed;
       }
-      if (this.slowed) {
-        this.slowed = false;
-        $(".toggle_slow").removeClass("active");
+      if (this.graph.slowed) {
+        this.graph.slowed = false;
+        return $(".toggle_slow").removeClass("active");
       } else {
-        this.slowed = true;
-        $(".toggle_slow").addClass("active");
-      }
-      if (this.graph != null) {
-        this.graph.slowed = this.slowed;
-      }
-      if (this.render != null) {
-        return this.render.slowed = this.slowed;
+        this.graph.slowed = true;
+        return $(".toggle_slow").addClass("active");
       }
     };
     Testing.prototype.toggle_pause = function(swap) {
-      var _ref;
+      var _base, _ref;
       if (swap == null) {
         swap = true;
       }
-      (_ref = this.forced_pause) != null ? _ref : this.forced_pause = false;
+      (_ref = (_base = this.graph).forced_pause) != null ? _ref : _base.forced_pause = false;
       if (!swap) {
-        this.forced_pause = (this.forced_pause ? false : true);
+        this.graph.forced_pause = !this.graph.forced_pause;
       }
-      if (this.forced_pause) {
-        this.forced_pause = false;
+      if (this.graph.forced_pause) {
+        this.graph.forced_pause = false;
         $(".toggle_pause").removeClass("active");
       } else {
-        this.forced_pause = true;
+        this.graph.forced_pause = true;
         $(".toggle_pause").addClass("active");
       }
-      if (this.graph != null) {
-        this.graph.paused = this.forced_pause;
-      }
-      if (this.render != null) {
-        this.render.paused = this.forced_pause;
-        return this.render.fpaused = this.forced_pause;
-      }
+      return this.graph.paused = this.graph.forced_pause;
     };
     Testing.prototype.toggle_2d = function() {
       $(".toggle_2d").addClass("active");
       $(".toggle_3d").removeClass("active");
-      this.renderer('2d');
-      if ((this.looping != null) && this.looping) {
-        return this.loop_indefinitely(this.pfn, this.frameskip, this.fps);
-      }
+      return this.renderer('2d');
     };
     Testing.prototype.toggle_3d = function() {
       $(".toggle_3d").addClass("active");
       $(".toggle_2d").removeClass("active");
-      this.renderer('3d');
-      if ((this.looping != null) && this.looping) {
-        return this.loop_indefinitely(null, this.frameskip, this.fps);
-      }
+      return this.renderer('3d');
     };
     Testing.prototype.toggle_spring = function() {
       $(".toggle_spring").addClass("active");
@@ -192,26 +94,6 @@
       $(".toggle_spring").removeClass("active");
       $(".toggle_kamada").addClass("active");
       return this.algorithm('kamada');
-    };
-    Testing.prototype.loop_indefinitely = function(pfn, frameskip, fps) {
-      var f;
-      this.pfn = pfn != null ? pfn : null;
-      this.frameskip = frameskip != null ? frameskip : 10;
-      this.fps = fps != null ? fps : 25;
-      if (!(this.render != null)) {
-        alert("unable to loop - no renderer...");
-      }
-      this.looping = true;
-      f = __bind(function() {
-        if ((this.pfn != null) && typeof this.pfn === 'function') {
-          this.pfn(this);
-        }
-        if (this.slowed || this.render.paused || this.forced_pause || (this.graph.iteration % this.frameskip === 0)) {
-          return this.render.draw();
-        }
-      }, this);
-      this.render.bind('iteration', f);
-      return this.graph.layout(null, this.fps);
     };
     Testing.prototype.clear_graph = function() {
       return this.graph.clear();
@@ -297,7 +179,6 @@
       }
       num != null ? num : num = parseInt(prompt("Number of nodes in loop [3-inf]", 10));
       num = num + offset - 2;
-      console.log(num);
       for (i = offset; (offset <= num ? i <= num : i >= num); (offset <= num ? i += 1 : i -= 1)) {
         this.graph.connect("a" + i, "a" + (i + 1));
       }
@@ -423,6 +304,31 @@
         this.graph.connect("a" + (size + offset), "a" + (i + offset));
       }
       return this.data_clique(size - 1, offset);
+    };
+    Testing.prototype.data_kneser = function(n, k) {
+      var i, j, s, _ref, _results;
+      if (n == null) {
+        n = 5;
+      }
+      if (k == null) {
+        k = 2;
+      }
+      n != null ? n : n = parseInt(prompt("Set size", 5));
+      k != null ? k : k = parseInt(prompt("Subset size", 2));
+      this.graph.subsets = new Subsets();
+      s = this.graph.subsets.list(n, k);
+      _results = [];
+      for (i = 0, _ref = s.length; (0 <= _ref ? i < _ref : i > _ref); (0 <= _ref ? i += 1 : i -= 1)) {
+        _results.push((function() {
+          var _ref, _ref2, _results;
+          _results = [];
+          for (j = _ref = i + 1, _ref2 = s.length; (_ref <= _ref2 ? j < _ref2 : j > _ref2); (_ref <= _ref2 ? j += 1 : j -= 1)) {
+            _results.push(this.graph.subsets.disjoint(s[i], s[j]) ? this.graph.connect(s[i].join(), s[j].join()) : void 0);
+          }
+          return _results;
+        }).call(this));
+      }
+      return _results;
     };
     Testing.prototype.random_of = function(ls) {
       return ls[Math.floor(Math.random() * ls.length)];

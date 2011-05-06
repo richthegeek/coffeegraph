@@ -1,8 +1,9 @@
-class Testing extends EventDriver
+class Testing
 	@detect: false
 	
 	constructor: () ->
 		@graphs = []
+		@graph = new Graph()
 	
 	update_graphs: (i) ->
 		if typeof(this.graphs) == "undefined"
@@ -11,116 +12,60 @@ class Testing extends EventDriver
 		g[0].apply(g[1], [i]) for g in this.graphs
 
 	algorithm: (@algo) ->
-		if @graph? and @graph.nodes? and @graph.nodes.length > 0
-			jso = @graph.asJSON(true)
-			t = @graph.is_3d.valueOf()
-
-		switch @algo
-			when 'spring' then @graph = new Spring()
-			when 'kamada' then @graph = new KamadaKawai()
-			when 'siman' then @graph = new SimulatedAnnealing()
-
-			else alert("not a valid algorithm choice :(")
-
-		if jso?
-			@graph.fromJSON(jso)
-
-			console.log(t)
-
-			if t == true
-				f = () => @toggle_3d()
-			else
-				f = () => @toggle_2d()
-			setTimeout(f,100)
-
-		@graph.unbind('iteration')
-		@graph.bind('iteration', this.update_graphs, this)
-
-	renderer: (name) ->
-		if (not @canvas?) or (not @graph?)
-			return alert('no canvas and/or algorithm chosen...')
+		@graph.layout.select(@algo)
 
 
-		if @render?
-			$(@render.canvas_dom).empty()
-			if @looping? and @looping
-				clearInterval(@render.loop)
-				clearTimeout(@render.loop)
-				@render.loop = false
-				@graph.loop = false
-			@render.events = @render.contexts = {}
-			if @detect then @detect_resize()
+	renderer: (@rendermode) ->
+		if @graph.render.projector?
+			$(@graph.render.projector.canvas_dom).empty()
 
-			delete n.element for n in @graph.nodes
-			delete e.element for e in @graph.edges
-
-
-		switch name
-			when '2d' then @render = new Render2D(@canvas, @graph)
-			when 'raphael' then @render = new Render2D(@canvas, @graph)
-
-			when '3d' then @render = new Render3D(@canvas, @graph)
-			when 'three' then @render = new Render3D(@canvas, @graph)
-
-			else alert('not a valid renderer choice :(')
-
+		@graph.render.select(@rendermode)
+		
 		@toggle_slow(false)
 		@toggle_pause(false)
-		@graph.iteration = 0
-		@graph.bind('iteration', @update_graphs)		
 
 	detect_resize: ->
 		@detect = true
-		document.body.onresize = () => @render.trigger("resize")
+		document.body.onresize = () => @graph.trigger("resize")
 
 	toggle_slow: (swap = true) ->
-		if not @slowed?
-			@slowed = false
+		if not @graph.slowed?
+			@graph.slowed = false
 
 		if not swap
-			@slowed = (if @slowed then false else true)
+			@graph.slowed = not @graph.slowed
 
-		if @slowed
-			@slowed = false
+		if @graph.slowed
+			@graph.slowed = false
 			$(".toggle_slow").removeClass("active")
 		else
-			@slowed = true
+			@graph.slowed = true
 			$(".toggle_slow").addClass("active")
 
-		if @graph? then @graph.slowed = @slowed
-		if @render? then @render.slowed = @slowed
-
 	toggle_pause: (swap = true) ->
-		@forced_pause ?= false
+		@graph.forced_pause ?= false
 		
 		if not swap
-			@forced_pause = (if @forced_pause then false else true)
+			@graph.forced_pause = not @graph.forced_pause
 
-		if @forced_pause
-			@forced_pause = false
+		if @graph.forced_pause
+			@graph.forced_pause = false
 			$(".toggle_pause").removeClass("active")
 		else
-			@forced_pause = true
+			@graph.forced_pause = true
 			$(".toggle_pause").addClass("active")
 		
-		if @graph? then @graph.paused = @forced_pause
-		if @render?
-			@render.paused = @forced_pause
-			@render.fpaused = @forced_pause
+		@graph.paused = @graph.forced_pause
 
 	toggle_2d: ->
 		$(".toggle_2d").addClass("active")
 		$(".toggle_3d").removeClass("active")
 		@renderer('2d')
-		if @looping? and @looping
-			@loop_indefinitely( @pfn, @frameskip, @fps )
 
 	toggle_3d: ->
 		$(".toggle_3d").addClass("active")
 		$(".toggle_2d").removeClass("active")
 		@renderer('3d')
-		if @looping? and @looping
-			@loop_indefinitely( null, @frameskip, @fps )
 
 	toggle_spring: ->
 		$(".toggle_spring").addClass("active")
@@ -132,22 +77,6 @@ class Testing extends EventDriver
 		$(".toggle_kamada").addClass("active")
 		@algorithm('kamada')
 	
-	loop_indefinitely: (@pfn = null, @frameskip = 10, @fps = 25) ->
-		if not @render?
-			alert("unable to loop - no renderer...")
-
-		@looping = true
-
-		f = () =>
-			if @pfn? and typeof(@pfn) == 'function' then @pfn(this)
-			if @slowed or @render.paused or @forced_pause or (@graph.iteration % @frameskip == 0) then @render.draw()
-		
-		# @render.unbind('iteration')
-		@render.bind('iteration', f)
-
-		@graph.layout(null, @fps)
-
-
 	clear_graph: ->
 		@graph.clear()
 
@@ -204,8 +133,6 @@ class Testing extends EventDriver
 		num ?= parseInt(prompt("Number of nodes in loop [3-inf]", 10))
 		num = num + offset - 2
 
-		console.log(num)
-
 		@graph.connect "a"+i, "a"+(i+1) for i in [offset..num]
 		@graph.connect "a"+i, "a"+offset
 
@@ -256,6 +183,18 @@ class Testing extends EventDriver
 		@graph.connect( "a"+(size+offset), "a"+(i+offset) ) for i in [1..size]
 
 		@data_clique size - 1, offset
+		
+	data_kneser: (n = 5, k = 2) ->
+		n ?= parseInt prompt "Set size", 5
+		k ?= parseInt prompt "Subset size", 2
+		
+		@graph.subsets = new Subsets();
+		s = @graph.subsets.list(n, k)
+			
+		for i in [0...s.length]
+			for j in [(i+1)...s.length]
+				if @graph.subsets.disjoint( s[i], s[j] )
+					@graph.connect( s[i].join(), s[j].join() )
 
 	random_of: (ls) ->
 		return ls[ Math.floor( Math.random() * ls.length ) ]

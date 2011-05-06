@@ -1,8 +1,7 @@
-class Render2D extends EventDriver
+class Render2D
 	constructor: (canvas, @graph) ->
 		if canvas then @set_canvas(canvas)
 
-		@graph.render = this
 		@graph.is_3d = false
 
 		@styles = {}
@@ -13,10 +12,6 @@ class Render2D extends EventDriver
 		@styles.drag_over = { "stroke-width" : 10, "stroke" : "#2CA350", "r": 10 }
 		@styles.drag_over_break = { "stroke-width" : 10, "stroke" : "#A3502C", "r": 10 }
 		@styles.hover = { opacity: 0.5, r: 10 }
-
-		@bind('resize',@resize)
-		@bind('delete_edge', @delete_element )
-		@bind('delete_node', @delete_element )
 
 	set_canvas: (canvas) ->
 		if typeof canvas is 'string'
@@ -76,6 +71,8 @@ class Render2D extends EventDriver
 		edge.element ?= @canvas.path().attr( @styles.edge )
 		return edge
 
+	delete_node: (n) -> @delete_element(n)
+	delete_edge: (e) -> @delete_edge(e)
 	delete_element: (el) ->
 		if el.element? and el.element.remove?
 			el.element.remove()
@@ -83,13 +80,15 @@ class Render2D extends EventDriver
 			el.label.remove()
 
 	hover_start: (o) ->
-		if @dragging? and o.element.data.name != @dragging.data.name
+		if not o.element?
+			@draw_node(o)
+		if @graph.dragging? and @graph.dragging.data? and o.element? and o.element.data? and o.element.data.name != @graph.dragging.data.name
 			@hover = o
-			if @graph.connected o.element.data, @dragging.data
+			if @graph.connected o.element.data, @graph.dragging.data
 				o.element.attr( @styles.drag_over_break )
 			else
 				o.element.attr( @styles.drag_over )
-		else if not @dragging? and not @dragging
+		else if not @graph.dragging? and not @graph.dragging
 			o.element.attr( @styles.hover )
 
 	hover_end: (o) ->
@@ -100,8 +99,8 @@ class Render2D extends EventDriver
 		@ox = @attr("cx")
 		@oy = @attr("cy")
 		@attr( @render.styles.dragging )
-		@render.paused = true
-		@render.dragging = this
+		@render.graph.paused = true
+		@render.graph.dragging = this
 
 	drag_move: (dx, dy) ->
 		[x,y] = [ @ox + dx - 15, @oy + dy - 15] # 15 is mouse offset (so it's not under the mouse, allowing hovering)
@@ -139,10 +138,10 @@ class Render2D extends EventDriver
 
 		# if not force-paused, unpause
 		if not(@render.fpaused? and @render.fpaused)
-			@render.paused = null
+			@render.graph.paused = null
 		
 		# unset dragging state, reset node style
-		@render.dragging = null
+		@render.graph.dragging = null
 		@attr( @render.styles.node )
 
 this.Render2D = Render2D
