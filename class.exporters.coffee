@@ -20,7 +20,7 @@ class Exporters
 		return text.join("\n")
 
 	fromDot: (data) ->
-		@clear()
+		@graph.clear()
 
 		lines = data.split("\n")
 		names = []
@@ -56,7 +56,7 @@ class Exporters
 		if typeof(data) == "string"
 			data = JSON.parse(data)
 		
-		@clear()
+		@graph.clear()
 
 		for node in data.nodes
 			do(node) ->
@@ -115,7 +115,7 @@ class Exporters
 				return false
 			s = a[1].name
 			t = a[2].name
-		@clear()
+		@graph.clear()
 		data.find('node').each( () -> @graph.add_node(new Node($(this).attr('id'))) )
 		data.find('edge').each( () -> @graph.connect($(this).attr(s), $(this).attr(t)) )
 

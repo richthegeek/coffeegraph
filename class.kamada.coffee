@@ -5,16 +5,23 @@ class KamadaKawai extends Graph
 		@paths = {}
 		@springs = {}
 
-	# this algorithm only has one gear; GO!!!
-	prepare: (iterations, @infinite = false) ->
+	select_dist: ->
+		if @graph.is_3d
+			@dist = @graph.distance_3d
+		else
+			@dist = @graph.distance_2d
+
+	prepare: () ->
+		@select_dist()
+
 		# scale graph by graph-size..
-		# s = Math.sqrt(Math.sqrt(@graph.nodes.length))
-		# [n.x, n.y, n.z] = [n.x * s, n.y * s, n.z * s] for n in @graph.nodes
+		s = Math.sqrt(Math.sqrt(@graph.nodes.length))
+		[n.x, n.y, n.z] = [n.x * s, n.y * s, n.z * s] for n in @graph.nodes
 
 		# compute shortest paths (O(n^3))
 		@shortest_paths()
 
-		@tolerance = 0.001
+		@tolerance = 0.1
 		@k = 1
 
 		@update_springs()
@@ -30,23 +37,22 @@ class KamadaKawai extends Graph
 			if delta > @delta_p
 				@p = n
 				@delta_p = delta
-		
-		@last_energy = Infinity
 
 
 	update_springs: () ->
-		# compute l and k (springs and distances?) (O(n^2))
+		# compute l and k (ideal lengths and spring-strengths) (O(n^2))
 		@springs = {}
 		@springs[u.name] = {} for u in @graph.nodes
 
 		for i, u of @graph.nodes
 			do(i,u) ->
 			for v in @graph.nodes[++i..] # yes, i know, horrible look
-				do(u,v) ->
+				do(u,v)->
 				dij = @paths[u.name][v.name]
 				if dij == Infinity then return false
-				@springs[u.name][v.name] = @springs[v.name][u.name] = @k / (dij*dij)	
-
+				kd = @k / (dij*dij)
+				@springs[u.name][v.name] = kd
+				@springs[v.name][u.name] = kd
 
 	# using the Floyd-Warshall algorithm 'cos I'm hardcore like that
 	# ported from networkX code
@@ -55,31 +61,60 @@ class KamadaKawai extends Graph
 	shortest_paths: ->
 		@paths = {}
 
-		# initialisation
-		for u in @nodes
-			do(u) ->
-			@paths[u.name] = {}
-			@paths[u.name][v.name] = Infinity for v in @graph.nodes # distance to nodes in general = Inf (calculated in cube loop)
-			@paths[u.name][v.name] = 1 for v in u.nodes # distance to nodes directly connected to u = 1
-			@paths[u.name][u.name] = 0 # distance to self = 0
+		lim = Math.ceil(Math.sqrt(@graph.nodes.length))
+		console.log("Calculating approximate APSP to depth " + lim)
+		for u in @graph.nodes
+			p = {}
+			p[v.name] = lim + 1 for v in @graph.nodes
+			p[u.name] = 0
 
-		# here comes the paaaiiinnn	
-		for w in @nodes
-			for u in @nodes when w != u
-				for v in @nodes when (v != u) and (v != w)
-					@paths[u.name][v.name] = Math.min(@paths[u.name][v.name], (@paths[u.name][w.name] + @paths[w.name][v.name]))
+			e = {}
+			e[u.name] = true
+			q = [u]
+			qo = 0
+
+			while q.length > 0
+				n = q.reverse().pop()
+				q = q.reverse();
+				for m in n.nodes when not e[m.name]?
+					p[m.name] = p[n.name] + 1
+					e[m.name] = true
+
+					# if p[m.name] <= lim
+					q.push(m)
+			
+			@paths[u.name] = p
+
+		return @paths
+
+		# A haiku:
+		# 	accurate APSP of O(n3)
+		# 	takes too long
+		# 	to use
+		#
+		# for u in @graph.nodes
+		# 	do(u) ->
+		# 	@paths[u.name] = {}
+		# 	@paths[u.name][v.name] = Infinity for v in @graph.nodes # distance to nodes in general = Inf (calculated in cube loop)
+		# 	@paths[u.name][v.name] = 1 for v in u.nodes # distance to nodes directly connected to u = 1
+		# 	@paths[u.name][u.name] = 0 # distance to self = 0
+
+		# # here comes the paaaiiinnn	
+		# for w in @graph.nodes
+		# 	for u in @graph.nodes when w != u
+		# 		for v in @graph.nodes when w != v and u != v
+		# 			@paths[u.name][v.name] = Math.min(@paths[u.name][v.name], (@paths[u.name][w.name] + @paths[w.name][v.name]))
 
 		return @paths
 
 	iterate: () ->
-		if @graph.nodes.length == 0
-			return
-	
+		@select_dist()
+
+		if @graph.nodes.length == 0 then return
 		# adds 2n to iteration, could probably be improved... ensures we have springs and paths
 		for n in @graph.nodes
 			if (not @paths) or (not @springs) or (not @partials) or (not @paths[n.name]?) or (not @springs[n.name]?) or (not @partials[n.name])
-				@prepare()
-				break
+				@prepare(); break
 		
 		# update p_partials - partials from each each node to p
 		@p_partials = {}
@@ -90,14 +125,14 @@ class KamadaKawai extends Graph
 
 		# select new p by updating each pd and delta
 		@select_new_p()
+		@graph.last_energy = @delta_p
 
 	inner_loop: () ->
-		# best approximation of do-while possible
-		i = 0
+		iter = 0 # iter is to make sure the algorithm doesn't get stuck
 		@last_local_energy = Infinity
-		while i < 300 and not @done(false)
-			i++
-
+		while iter < 500 and not @done(false)
+			iter++
+			
 			# compute elements of jacobian
 			mat = { xx: 0, yy: 0, xy: 0, yx: 0}
 			dim = ['x','y']
@@ -112,7 +147,7 @@ class KamadaKawai extends Graph
 			d = {}
 			for n in @graph.nodes when not (n is @p)
 				do() ->
-				[d2, d.x, d.y, d.z] = @distance(@p, n)
+				[d2, d.x, d.y, d.z] = @dist(@p, n)
 
 				k = spr[n.name]
 				lid3 = pat[n.name] * (1 / (d2*Math.sqrt(d2)))
@@ -154,6 +189,7 @@ class KamadaKawai extends Graph
 	
 	linear_solver: (mat, rhs) ->
 		if @graph.is_3d
+			# minor reduction in number of calculations
 			[c1, c2, c3] = [ (mat.yy * mat.zz - mat.yz * mat.yz), (mat.xy * mat.zz - mat.yz * mat.xz), (mat.xy * mat.yz - mat.yy * mat.xz) ]
 
 			denom = 1 / (mat.xx * c1 - mat.xy * c2 + mat.xz * c3)
@@ -176,7 +212,7 @@ class KamadaKawai extends Graph
 		result = { x: 0, y: 0, z: 0 }
 
 		if not (i is m)
-			[d2, dx, dy, dz] = @distance( m, i )
+			[d2, dx, dy, dz] = @dist( m, i )
 			k = @springs[m.name][i.name]
 			l = @paths[m.name][i.name] / Math.sqrt(d2)
 
@@ -199,19 +235,19 @@ class KamadaKawai extends Graph
 	calculate_delta: (partial) ->
 		if @graph.is_3d
 			return Math.sqrt(partial.x*partial.x + partial.y*partial.y + partial.z*partial.z)
-		return Math.sqrt(partial.x*partial.x + partial.y*partial.y)
+		else
+			return Math.sqrt(partial.x*partial.x + partial.y*partial.y)
 
 
-	done: (glob) ->
-		name = (if glob != false then 'last_energy' else 'last_local_energy')
+	# checks wether the change in energy is small enough to move on
+	done: () ->
+		if @last_local_energy == Infinity || @last_local_energy < @delta_p
+				@last_local_energy = @delta_p
+				return false
 		
-		if this[name] == Infinity
-			this[name] = @delta_p
-			return false
-
-		diff = Math.abs(this[name] - @delta_p)
-		done = ((@delta_p == 0) or (diff / this[name] < @tolerance))
-		this[name] = @delta_p
+		diff = 1 - (Math.abs(@last_local_energy - @delta_p) / @last_local_energy)
+		done = ((@delta_p == 0) or (diff < @tolerance))
+		@last_local_energy = @delta_p
 		return done
 
 this.KamadaKawai = KamadaKawai

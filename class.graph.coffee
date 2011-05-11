@@ -121,25 +121,27 @@ class Graph extends EventDriver
 
 	# rand flag is for use with the renderer
 	distance_3d: (n1, n2, rand = true) ->
-		[dx, dy, dz] = [ n2.x - n1.x, n2.y - n1.y, n2.z - n1.z ]
-
+		dx = n2.x - n1.x
+		dy = n2.y - n1.y
+		dz = n2.z - n1.z
 		d2 = (dx*dx) + (dy*dy) + (dz*dz)
 		
-		if d2 < 0.01 and rand == true
-			x = () -> Math.random() * 0.1 + 0.1
-			[dx, dy, dz] = [ x(), x(), x() ]
+		if d2 < 0.01 and rand
+			dx = (Math.random() * 0.1) + 0.1
+			dy = (Math.random() * 0.1) + 0.1
+			dz = (Math.random() * 0.1) + 0.1
 			d2 = (dx*dx) + (dy*dy) + (dz*dz)
 		
-		return [ d2, dx, dy, dz ]
+		return [ d2, dx, dy, dz ] # dz changed from 0 -> 1, to allow PD in KK
 
 	distance_2d: (n1, n2) ->
-		[dx, dy] = [ n2.x - n1.x, n2.y - n1.y ]
-
+		dx = n2.x - n1.x
+		dy = n2.y - n1.y
 		d2 = (dx*dx) + (dy*dy)
 		
 		if d2 < 0.01
-			x = () -> Math.random() * 0.1 + 0.1
-			[dx, dy] = [ x(), x() ]
+			dx = (Math.random() * 0.1) + 0.1
+			dy = (Math.random() * 0.1) + 0.1
 			d2 = dx*dx + dy*dy
 		
 		return [ d2, dx, dy, 1 ] # dz changed from 0 -> 1, to allow PD in KK

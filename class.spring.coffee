@@ -21,7 +21,7 @@ class Spring
 		# experimental
 		# this modifies the spring constant so it is related to how many nodes there are.
 		# 	less nodes = higher constant.
-		# 	effectively reduces scale of graph as it gets larger.
+		# 	effectively adjusts scale of graph as it gets larger.
 		@k = 8 / Math.log(@graph.nodes.length)
 		@k2 = @k * @k
 		# experimental p2 - reduces attraction in early stages to encourage big bang

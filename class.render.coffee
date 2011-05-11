@@ -12,19 +12,23 @@ class Render
 	constructor: (graph) ->
 		@graph = graph
 		@frameskip = 10
-		
-		@graph.bind("iteration", @draw)
-		
-		# pass through events
-		@graph.bind('resize', () => @projector.resize )
-		@graph.bind("add_node", (n) => if @projector.add_node? then @projector.add_node(n))
-		@graph.bind("add_edge", (e) => if @projector.add_edge? then @projector.add_edge(e))
-		@graph.bind("delete_node", (n) => if @projector.delete_node? then @projector.delete_node(n))
-		@graph.bind("delete_edge", (n) => if @projector.delete_edge? then @projector.delete_edge(n))
+
+		@projector = false
+
 		
 	
 	# switch the renderer between 2D/3D
 	select: (name) ->
+		if (not @projector?) or (@projector == false)
+			@graph.bind("iteration", @draw)
+			# pass through events
+			@graph.bind('resize', () => @projector.resize )
+			@graph.bind("add_node", (n) => if @projector.add_node? then @projector.add_node(n))
+			@graph.bind("add_edge", (e) => if @projector.add_edge? then @projector.add_edge(e))
+			@graph.bind("delete_node", (n) => if @projector.delete_node? then @projector.delete_node(n))
+			@graph.bind("delete_edge", (n) => if @projector.delete_edge? then @projector.delete_edge(n))
+
+
 		name = name.toLowerCase()
 		
 		# if there are nodes, and the nodes have elements (where the canvas object is stored) and 
