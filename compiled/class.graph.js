@@ -162,30 +162,30 @@
       return (this.is_3d ? this.distance_3d : this.distance_2d)(n1, n2);
     };
     Graph.prototype.distance_3d = function(n1, n2, rand) {
-      var d2, dx, dy, dz, x, _ref, _ref2;
+      var d2, dx, dy, dz;
       if (rand == null) {
         rand = true;
       }
-      _ref = [n2.x - n1.x, n2.y - n1.y, n2.z - n1.z], dx = _ref[0], dy = _ref[1], dz = _ref[2];
+      dx = n2.x - n1.x;
+      dy = n2.y - n1.y;
+      dz = n2.z - n1.z;
       d2 = (dx * dx) + (dy * dy) + (dz * dz);
-      if (d2 < 0.01 && rand === true) {
-        x = function() {
-          return Math.random() * 0.1 + 0.1;
-        };
-        _ref2 = [x(), x(), x()], dx = _ref2[0], dy = _ref2[1], dz = _ref2[2];
+      if (d2 < 0.01 && rand) {
+        dx = (Math.random() * 0.1) + 0.1;
+        dy = (Math.random() * 0.1) + 0.1;
+        dz = (Math.random() * 0.1) + 0.1;
         d2 = (dx * dx) + (dy * dy) + (dz * dz);
       }
       return [d2, dx, dy, dz];
     };
     Graph.prototype.distance_2d = function(n1, n2) {
-      var d2, dx, dy, x, _ref, _ref2;
-      _ref = [n2.x - n1.x, n2.y - n1.y], dx = _ref[0], dy = _ref[1];
+      var d2, dx, dy;
+      dx = n2.x - n1.x;
+      dy = n2.y - n1.y;
       d2 = (dx * dx) + (dy * dy);
       if (d2 < 0.01) {
-        x = function() {
-          return Math.random() * 0.1 + 0.1;
-        };
-        _ref2 = [x(), x()], dx = _ref2[0], dy = _ref2[1];
+        dx = (Math.random() * 0.1) + 0.1;
+        dy = (Math.random() * 0.1) + 0.1;
         d2 = dx * dx + dy * dy;
       }
       return [d2, dx, dy, 1];

@@ -42,7 +42,7 @@
     };
     Exporters.prototype.fromDot = function(data) {
       var es, line, lines, m, n1, n2, names, _fn, _i, _len;
-      this.clear();
+      this.graph.clear();
       lines = data.split("\n");
       names = [];
       es = [];
@@ -102,7 +102,7 @@
       if (typeof data === "string") {
         data = JSON.parse(data);
       }
-      this.clear();
+      this.graph.clear();
       _ref = data.nodes;
       _fn = function(node) {};
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -193,7 +193,7 @@
         s = a[1].name;
         t = a[2].name;
       }
-      this.clear();
+      this.graph.clear();
       data.find('node').each(function() {
         return this.graph.add_node(new Node($(this).attr('id')));
       });

@@ -5,33 +5,36 @@
     function Render(graph) {
       this.draw = __bind(this.draw, this);;      this.graph = graph;
       this.frameskip = 10;
-      this.graph.bind("iteration", this.draw);
-      this.graph.bind('resize', __bind(function() {
-        return this.projector.resize;
-      }, this));
-      this.graph.bind("add_node", __bind(function(n) {
-        if (this.projector.add_node != null) {
-          return this.projector.add_node(n);
-        }
-      }, this));
-      this.graph.bind("add_edge", __bind(function(e) {
-        if (this.projector.add_edge != null) {
-          return this.projector.add_edge(e);
-        }
-      }, this));
-      this.graph.bind("delete_node", __bind(function(n) {
-        if (this.projector.delete_node != null) {
-          return this.projector.delete_node(n);
-        }
-      }, this));
-      this.graph.bind("delete_edge", __bind(function(n) {
-        if (this.projector.delete_edge != null) {
-          return this.projector.delete_edge(n);
-        }
-      }, this));
+      this.projector = false;
     }
     Render.prototype.select = function(name) {
       var e, n, _i, _j, _k, _len, _len2, _len3, _ref, _ref2, _ref3;
+      if ((!(this.projector != null)) || (this.projector === false)) {
+        this.graph.bind("iteration", this.draw);
+        this.graph.bind('resize', __bind(function() {
+          return this.projector.resize;
+        }, this));
+        this.graph.bind("add_node", __bind(function(n) {
+          if (this.projector.add_node != null) {
+            return this.projector.add_node(n);
+          }
+        }, this));
+        this.graph.bind("add_edge", __bind(function(e) {
+          if (this.projector.add_edge != null) {
+            return this.projector.add_edge(e);
+          }
+        }, this));
+        this.graph.bind("delete_node", __bind(function(n) {
+          if (this.projector.delete_node != null) {
+            return this.projector.delete_node(n);
+          }
+        }, this));
+        this.graph.bind("delete_edge", __bind(function(n) {
+          if (this.projector.delete_edge != null) {
+            return this.projector.delete_edge(n);
+          }
+        }, this));
+      }
       name = name.toLowerCase();
       if (this.graph.nodes.length && (this.graph.nodes[0].element != null) && (this.graph.nodes[0].element.remove != null)) {
         _ref = this.graph.nodes;

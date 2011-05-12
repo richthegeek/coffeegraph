@@ -15,31 +15,42 @@
       this.paths = {};
       this.springs = {};
     }
-    KamadaKawai.prototype.prepare = function(iterations, infinite) {
-      var delta, n, _fn, _i, _len, _ref;
-      this.infinite = infinite != null ? infinite : false;
+    KamadaKawai.prototype.select_dist = function() {
+      if (this.graph.is_3d) {
+        return this.dist = this.graph.distance_3d;
+      } else {
+        return this.dist = this.graph.distance_2d;
+      }
+    };
+    KamadaKawai.prototype.prepare = function() {
+      var delta, n, s, _fn, _i, _j, _len, _len2, _ref, _ref2, _ref3, _results;
+      this.select_dist();
+      s = Math.sqrt(Math.sqrt(this.graph.nodes.length));
+      _ref = this.graph.nodes;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        n = _ref[_i];
+        _ref2 = [n.x * s, n.y * s, n.z * s], n.x = _ref2[0], n.y = _ref2[1], n.z = _ref2[2];
+      }
       this.shortest_paths();
-      this.tolerance = 0.001;
+      this.tolerance = 0.1;
       this.k = 1;
       this.update_springs();
       this.delta_p = -Infinity;
       this.partials = {};
-      _ref = this.graph.nodes;
+      _ref3 = this.graph.nodes;
       _fn = function(n) {};
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        n = _ref[_i];
+      _results = [];
+      for (_j = 0, _len2 = _ref3.length; _j < _len2; _j++) {
+        n = _ref3[_j];
         _fn(n);
         this.partials[n.name] = this.compute_partial_derivatives(n);
         delta = this.calculate_delta(this.partials[n.name]);
-        if (delta > this.delta_p) {
-          this.p = n;
-          this.delta_p = delta;
-        }
+        _results.push(delta > this.delta_p ? (this.p = n, this.delta_p = delta) : void 0);
       }
-      return this.last_energy = Infinity;
+      return _results;
     };
     KamadaKawai.prototype.update_springs = function() {
-      var dij, i, u, v, _fn, _fn2, _i, _j, _len, _len2, _ref, _ref2, _ref3, _results;
+      var dij, i, kd, u, v, _fn, _fn2, _i, _j, _len, _len2, _ref, _ref2, _ref3, _results;
       this.springs = {};
       _ref = this.graph.nodes;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -61,53 +72,53 @@
           if (dij === Infinity) {
             return false;
           }
-          this.springs[u.name][v.name] = this.springs[v.name][u.name] = this.k / (dij * dij);
+          kd = this.k / (dij * dij);
+          this.springs[u.name][v.name] = kd;
+          this.springs[v.name][u.name] = kd;
         }
       }
       return _results;
     };
     KamadaKawai.prototype.shortest_paths = function() {
-      var u, v, w, _fn, _i, _j, _k, _l, _len, _len2, _len3, _len4, _len5, _len6, _m, _n, _ref, _ref2, _ref3, _ref4, _ref5, _ref6;
+      var e, lim, m, n, p, q, qo, u, v, _i, _j, _k, _len, _len2, _len3, _ref, _ref2, _ref3;
       this.paths = {};
-      _ref = this.nodes;
-      _fn = function(u) {};
+      lim = Math.ceil(Math.sqrt(this.graph.nodes.length));
+      console.log("Calculating approximate APSP to depth " + lim);
+      _ref = this.graph.nodes;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         u = _ref[_i];
-        _fn(u);
-        this.paths[u.name] = {};
+        p = {};
         _ref2 = this.graph.nodes;
         for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
           v = _ref2[_j];
-          this.paths[u.name][v.name] = Infinity;
+          p[v.name] = lim + 1;
         }
-        _ref3 = u.nodes;
-        for (_k = 0, _len3 = _ref3.length; _k < _len3; _k++) {
-          v = _ref3[_k];
-          this.paths[u.name][v.name] = 1;
-        }
-        this.paths[u.name][u.name] = 0;
-      }
-      _ref4 = this.nodes;
-      for (_l = 0, _len4 = _ref4.length; _l < _len4; _l++) {
-        w = _ref4[_l];
-        _ref5 = this.nodes;
-        for (_m = 0, _len5 = _ref5.length; _m < _len5; _m++) {
-          u = _ref5[_m];
-          if (w !== u) {
-            _ref6 = this.nodes;
-            for (_n = 0, _len6 = _ref6.length; _n < _len6; _n++) {
-              v = _ref6[_n];
-              if ((v !== u) && (v !== w)) {
-                this.paths[u.name][v.name] = Math.min(this.paths[u.name][v.name], this.paths[u.name][w.name] + this.paths[w.name][v.name]);
-              }
+        p[u.name] = 0;
+        e = {};
+        e[u.name] = true;
+        q = [u];
+        qo = 0;
+        while (q.length > 0) {
+          n = q.reverse().pop();
+          q = q.reverse();
+          _ref3 = n.nodes;
+          for (_k = 0, _len3 = _ref3.length; _k < _len3; _k++) {
+            m = _ref3[_k];
+            if (!(e[m.name] != null)) {
+              p[m.name] = p[n.name] + 1;
+              e[m.name] = true;
+              q.push(m);
             }
           }
         }
+        this.paths[u.name] = p;
       }
+      return this.paths;
       return this.paths;
     };
     KamadaKawai.prototype.iterate = function() {
       var n, _i, _j, _len, _len2, _ref, _ref2;
+      this.select_dist();
       if (this.graph.nodes.length === 0) {
         return;
       }
@@ -126,15 +137,16 @@
         this.p_partials[n.name] = this.compute_partial_derivative(n, this.p);
       }
       this.inner_loop();
-      return this.select_new_p();
+      this.select_new_p();
+      return this.graph.last_energy = this.delta_p;
     };
     KamadaKawai.prototype.inner_loop = function() {
-      var a, d, d2, delta, dim, i, j, k, lid3, mat, n, pat, spr, _i, _j, _k, _l, _len, _len2, _len3, _len4, _ref, _ref2, _ref3, _results;
-      i = 0;
+      var a, d, d2, delta, dim, i, iter, j, k, lid3, mat, n, pat, spr, _i, _j, _k, _l, _len, _len2, _len3, _len4, _ref, _ref2, _ref3, _results;
+      iter = 0;
       this.last_local_energy = Infinity;
       _results = [];
-      while (i < 300 && !this.done(false)) {
-        i++;
+      while (iter < 500 && !this.done(false)) {
+        iter++;
         mat = {
           xx: 0,
           yy: 0,
@@ -158,7 +170,7 @@
           n = _ref2[_j];
           if (!(n === this.p)) {
             (function() {})();
-            _ref3 = this.distance(this.p, n), d2 = _ref3[0], d.x = _ref3[1], d.y = _ref3[2], d.z = _ref3[3];
+            _ref3 = this.dist(this.p, n), d2 = _ref3[0], d.x = _ref3[1], d.y = _ref3[2], d.z = _ref3[3];
             k = spr[n.name];
             lid3 = pat[n.name] * (1 / (d2 * Math.sqrt(d2)));
             for (_k = 0, _len3 = dim.length; _k < _len3; _k++) {
@@ -226,7 +238,7 @@
         z: 0
       };
       if (!(i === m)) {
-        _ref = this.distance(m, i), d2 = _ref[0], dx = _ref[1], dy = _ref[2], dz = _ref[3];
+        _ref = this.dist(m, i), d2 = _ref[0], dx = _ref[1], dy = _ref[2], dz = _ref[3];
         k = this.springs[m.name][i.name];
         l = this.paths[m.name][i.name] / Math.sqrt(d2);
         result.x = k * (dx - l * dx);
@@ -258,19 +270,19 @@
     KamadaKawai.prototype.calculate_delta = function(partial) {
       if (this.graph.is_3d) {
         return Math.sqrt(partial.x * partial.x + partial.y * partial.y + partial.z * partial.z);
+      } else {
+        return Math.sqrt(partial.x * partial.x + partial.y * partial.y);
       }
-      return Math.sqrt(partial.x * partial.x + partial.y * partial.y);
     };
-    KamadaKawai.prototype.done = function(glob) {
-      var diff, done, name;
-      name = (glob !== false ? 'last_energy' : 'last_local_energy');
-      if (this[name] === Infinity) {
-        this[name] = this.delta_p;
+    KamadaKawai.prototype.done = function() {
+      var diff, done;
+      if (this.last_local_energy === Infinity || this.last_local_energy < this.delta_p) {
+        this.last_local_energy = this.delta_p;
         return false;
       }
-      diff = Math.abs(this[name] - this.delta_p);
-      done = (this.delta_p === 0) || (diff / this[name] < this.tolerance);
-      this[name] = this.delta_p;
+      diff = 1 - (Math.abs(this.last_local_energy - this.delta_p) / this.last_local_energy);
+      done = (this.delta_p === 0) || (diff < this.tolerance);
+      this.last_local_energy = this.delta_p;
       return done;
     };
     return KamadaKawai;

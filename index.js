@@ -9,15 +9,15 @@ var inf = function()
 	t.graph.render.canvas = 'canvas'
 	
 	t.toggle_spring()
-	t.toggle_2d()
 	t.detect_resize()
 
-
-	// t.data_grid_3d(5,5,5)
+	t.data_grid(10,10)
 	// t.data_cube()
-	// t.data_clique(5)
+	// t.data_clique(15)
 
-	t.data_kneser(5,2)
+	// t.data_kneser(5,2)
+
+
 
 	f = function()
 	{
@@ -35,8 +35,28 @@ var inf = function()
 		register_graph(t, 'fps', id4, 10)		
 	}
 	setTimeout(f,100)
+
 	
-	t.graph.layout.loop()
+	// t.graph.bind("iteration", function( i )
+	// {
+		// if(t.graph.nodes.length == 0) return;
+		// if(i % 50) return;
+		// $.post( "draw.php", { graph: t.graph.format.asJSON(), i: i } )
+	// })
+	
+	// t.graph.layout.loop()
+	// return;
+
+	// console.profile()
+	// t.graph.layout.finite(1000, true, true)
+	// console.profileEnd()
+	t.toggle_2d()
+	// t.graph.render.draw()
+
+	// t.graph.render.frameskip = 500
+	// t.graph.layout.finite(500,true,true)
+	// t.toggle_2d()
+	t.graph.layout.loop(false)
 }
 
 $(function ()
