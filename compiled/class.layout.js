@@ -14,6 +14,8 @@
         return this.algorithm = new Spring(this.graph);
       } else if (name === "kamadakawai" || name === "kamada") {
         return this.algorithm = new KamadaKawai(this.graph);
+      } else if (name === "mixed") {
+        return this.algorithm = new Mixed(this.graph);
       }
     };
     Layout.prototype.finite = function(i, prep, bulk) {
@@ -33,7 +35,7 @@
       }
       if (bulk) {
         _results = [];
-        for (j = 1; (1 <= i ? j <= i : j >= i); (1 <= i ? j += 1 : j -= 1)) {
+        for (j = 1; 1 <= i ? j <= i : j >= i; 1 <= i ? j++ : j--) {
           _results.push(this.iterate());
         }
         return _results;

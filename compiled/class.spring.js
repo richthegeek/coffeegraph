@@ -7,7 +7,7 @@
       this.k = 2;
       this.m = 0.01;
       this.d = 0.5;
-      this.r = 10;
+      this.r = 5;
       this.r2 = this.r * this.r;
       this.attract_scale = 1;
     }
@@ -15,15 +15,13 @@
       return this.iteration = 0;
     };
     Spring.prototype.iterate = function() {
-      var edge, i, j, node, to, _fn, _i, _j, _len, _len2, _ref, _ref2, _ref3, _ref4, _ref5;
-      this.k = 8 / Math.log(this.graph.nodes.length);
+      var edge, i, j, node, to, _i, _j, _len, _len2, _ref, _ref2, _ref3, _ref4, _ref5;
+      this.k = 0.6;
       this.k2 = this.k * this.k;
       this.sqrt_nl_as = Math.sqrt(this.graph.nodes.length) * this.attract_scale;
       this.dist = (this.graph.is_3d ? this.graph.distance_3d : this.graph.distance_2d);
-      _fn = __bind(function(i) {}, this);
-      for (i = 0, _ref = this.graph.nodes.length; (0 <= _ref ? i < _ref : i > _ref); (0 <= _ref ? i += 1 : i -= 1)) {
-        _fn(i);
-        for (j = _ref2 = i + 1, _ref3 = this.graph.nodes.length; (_ref2 <= _ref3 ? j < _ref3 : j > _ref3); (_ref2 <= _ref3 ? j += 1 : j -= 1)) {
+      for (i = 0, _ref = this.graph.nodes.length; 0 <= _ref ? i < _ref : i > _ref; 0 <= _ref ? i++ : i--) {
+        for (j = _ref2 = i + 1, _ref3 = this.graph.nodes.length; _ref2 <= _ref3 ? j < _ref3 : j > _ref3; _ref2 <= _ref3 ? j++ : j--) {
           this.repulse(this.graph.nodes[i], this.graph.nodes[j]);
         }
       }

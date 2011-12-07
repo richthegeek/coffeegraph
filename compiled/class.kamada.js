@@ -9,12 +9,12 @@
     return child;
   };
   KamadaKawai = (function() {
-    __extends(KamadaKawai, Graph);
     function KamadaKawai(graph) {
       this.graph = graph;
       this.paths = {};
       this.springs = {};
     }
+    __extends(KamadaKawai, Graph);
     KamadaKawai.prototype.select_dist = function() {
       if (this.graph.is_3d) {
         return this.dist = this.graph.distance_3d;
@@ -83,7 +83,6 @@
       var e, lim, m, n, p, q, qo, u, v, _i, _j, _k, _len, _len2, _len3, _ref, _ref2, _ref3;
       this.paths = {};
       lim = Math.ceil(Math.sqrt(this.graph.nodes.length));
-      console.log("Calculating approximate APSP to depth " + lim);
       _ref = this.graph.nodes;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         u = _ref[_i];

@@ -18,6 +18,15 @@ class Layout
 			@algorithm = new Spring(@graph)
 		else if name == "kamadakawai" || name == "kamada"
 			@algorithm = new KamadaKawai(@graph)
+		else if name == "mixed"
+			@algorithm = new Mixed(@graph)
+
+
+		# @graph.bind('resize', () => @algorithm.resize )
+		# @graph.bind("add_node", (n) => if @algorithm.add_node? then @algorithm.add_node(n))
+		# @graph.bind("add_edge", (e) => if @algorithm.add_edge? then @algorithm.add_edge(e))
+		# @graph.bind("delete_node", (n) => if @algorithm.delete_node? then @algorithm.delete_node(n))
+		# @graph.bind("delete_edge", (n) => if @algorithm.delete_edge? then @algorithm.delete_edge(n))			
 
 
 	# execute a fixed number of iterations either in bulk (as fast as possible)

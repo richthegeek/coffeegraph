@@ -77,6 +77,9 @@ class Testing
 		$(".toggle_kamada").addClass("active")
 		@algorithm('kamada')
 	
+	toggle_mixed: ->
+		@algorithm('mixed')
+	
 	clear_graph: ->
 		@graph.clear()
 
@@ -151,9 +154,9 @@ class Testing
 				if y < h then @graph.connect( "x"+x+"y"+y, "x"+x+"y"+(y+1) )
 
 	data_grid_3d: (w = null, h = null, d = null) ->
-		w ?= parseInt prompt "Grid width", 10
+		w ?= parseInt prompt "Grid width", 5
 		h ?= parseInt prompt "Grid height", w
-		d ?= parseInt prompt "Grid depth", w
+		d ?= parseInt prompt "Grid depth", h
 		
 		#@graph.add "p111"
 
@@ -180,7 +183,7 @@ class Testing
 		if size == 1
 			return true
 
-		@graph.connect( "a"+(size+offset), "a"+(i+offset) ) for i in [1..size]
+		@graph.connect( "n"+(size+offset), "n"+(i+offset) ) for i in [1..size]
 
 		@data_clique size - 1, offset
 		
@@ -195,6 +198,12 @@ class Testing
 			for j in [(i+1)...s.length]
 				if @graph.subsets.disjoint( s[i], s[j] )
 					@graph.connect( s[i].join(), s[j].join() )
+
+	data_random: (n=10, p=0.1) ->
+		for i in [0...n]
+			for j in [(i+1)...n]
+				if Math.random() < p
+					@graph.connect("n"+i, "n"+j)
 
 	random_of: (ls) ->
 		return ls[ Math.floor( Math.random() * ls.length ) ]

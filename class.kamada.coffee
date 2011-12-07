@@ -24,6 +24,7 @@ class KamadaKawai extends Graph
 		@tolerance = 0.1
 		@k = 1
 
+
 		@update_springs()
 				
 		# get first p/delta_p
@@ -62,7 +63,6 @@ class KamadaKawai extends Graph
 		@paths = {}
 
 		lim = Math.ceil(Math.sqrt(@graph.nodes.length))
-		console.log("Calculating approximate APSP to depth " + lim)
 		for u in @graph.nodes
 			p = {}
 			p[v.name] = lim + 1 for v in @graph.nodes

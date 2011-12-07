@@ -55,7 +55,7 @@
     Linegraph.prototype.set_canvas = function(canvas) {
       var h, w;
       if (typeof canvas === "string") {
-        if (typeof jQuery != "undefined" && jQuery !== null) {
+        if (typeof jQuery !== "undefined" && jQuery !== null) {
           canvas = $(canvas)[0];
           w = $(canvas).width();
           h = $(canvas).height();

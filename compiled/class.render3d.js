@@ -9,8 +9,8 @@
     return child;
   };
   Render3D = (function() {
-    __extends(Render3D, EventDriver);
     Render3D.prototype.iteration = 0;
+    __extends(Render3D, EventDriver);
     function Render3D(canvas, graph) {
       this.graph = graph;
       this.zoom = __bind(this.zoom, this);;
@@ -159,7 +159,11 @@
     };
     Render3D.prototype.draw = function() {
       var e, en, enl, geo, line, n, par, par1, par2, _fn, _fn2, _i, _j, _len, _len2, _ref, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
-      (_ref = this.objects) != null ? _ref : this.objects = {};
+            if ((_ref = this.objects) != null) {
+        _ref;
+      } else {
+        this.objects = {};
+      };
       _ref2 = this.graph.nodes;
       _fn = __bind(function(n) {}, this);
       for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
@@ -178,9 +182,21 @@
         par.scale.x = par.scale.y = par.scale.z = Math.sqrt(this.data.radius) / 12;
         par.updateMatrix();
       }
-      (_ref4 = this.iteration) != null ? _ref4 : this.iteration = 0;
-      (_ref5 = this.i) != null ? _ref5 : this.i = 1;
-      (_ref6 = this.cube) != null ? _ref6 : this.cube = new Cube(1, 1, 1);
+            if ((_ref4 = this.iteration) != null) {
+        _ref4;
+      } else {
+        this.iteration = 0;
+      };
+            if ((_ref5 = this.i) != null) {
+        _ref5;
+      } else {
+        this.i = 1;
+      };
+            if ((_ref6 = this.cube) != null) {
+        _ref6;
+      } else {
+        this.cube = new Cube(1, 1, 1);
+      };
       _ref7 = this.graph.edges;
       _fn2 = __bind(function(e) {}, this);
       for (_j = 0, _len2 = _ref7.length; _j < _len2; _j++) {

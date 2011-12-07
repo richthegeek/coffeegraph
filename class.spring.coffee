@@ -8,7 +8,7 @@ class Spring
 		@k = 2 # currently ignored from @iterate - related to number of nodes
 		@m = 0.01 # multiplier for forces in @apply
 		@d = 0.5 # max/min node movement
-		@r = 10 # radius at which nodes affect each other in repulsion
+		@r = 5 # radius at which nodes affect each other in repulsion
 		@r2 = @r * @r # calculate this here (optimisation)
 
 		# experimental
@@ -22,7 +22,7 @@ class Spring
 		# this modifies the spring constant so it is related to how many nodes there are.
 		# 	less nodes = higher constant.
 		# 	effectively adjusts scale of graph as it gets larger.
-		@k = 8 / Math.log(@graph.nodes.length)
+		@k = 0.6
 		@k2 = @k * @k
 		# experimental p2 - reduces attraction in early stages to encourage big bang
 		@sqrt_nl_as = Math.sqrt( @graph.nodes.length ) * @attract_scale
@@ -33,7 +33,6 @@ class Spring
 		
 		# for each pair of nodes, repulse
 		for i in [0...@graph.nodes.length]
-			do (i) =>
 			@repulse @graph.nodes[i], @graph.nodes[j] for j in [(i+1)...@graph.nodes.length]
 
 		# for each edge, attract

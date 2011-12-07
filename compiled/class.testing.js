@@ -62,7 +62,11 @@
       if (swap == null) {
         swap = true;
       }
-      (_ref = (_base = this.graph).forced_pause) != null ? _ref : _base.forced_pause = false;
+            if ((_ref = (_base = this.graph).forced_pause) != null) {
+        _ref;
+      } else {
+        _base.forced_pause = false;
+      };
       if (!swap) {
         this.graph.forced_pause = !this.graph.forced_pause;
       }
@@ -95,6 +99,9 @@
       $(".toggle_kamada").addClass("active");
       return this.algorithm('kamada');
     };
+    Testing.prototype.toggle_mixed = function() {
+      return this.algorithm('mixed');
+    };
     Testing.prototype.clear_graph = function() {
       return this.graph.clear();
     };
@@ -107,14 +114,14 @@
         n1 = _ref[i];
         _fn(n1);
         _results.push((function() {
-          var _i, _len, _ref, _results;
-          _ref = this.graph.nodes.slice(i);
-          _results = [];
-          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            n2 = _ref[_i];
-            _results.push(this.graph.connect(n1, n2));
+          var _i, _len, _ref2, _results2;
+          _ref2 = this.graph.nodes.slice(i);
+          _results2 = [];
+          for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+            n2 = _ref2[_i];
+            _results2.push(this.graph.connect(n1, n2));
           }
-          return _results;
+          return _results2;
         }).call(this));
       }
       return _results;
@@ -177,9 +184,13 @@
       if (offset == null) {
         offset = 0;
       }
-      num != null ? num : num = parseInt(prompt("Number of nodes in loop [3-inf]", 10));
+            if (num != null) {
+        num;
+      } else {
+        num = parseInt(prompt("Number of nodes in loop [3-inf]", 10));
+      };
       num = num + offset - 2;
-      for (i = offset; (offset <= num ? i <= num : i >= num); (offset <= num ? i += 1 : i -= 1)) {
+      for (i = offset; offset <= num ? i <= num : i >= num; offset <= num ? i++ : i--) {
         this.graph.connect("a" + i, "a" + (i + 1));
       }
       return this.graph.connect("a" + i, "a" + offset);
@@ -192,25 +203,33 @@
       if (h == null) {
         h = null;
       }
-      w != null ? w : w = parseInt(prompt("Grid width", 10));
-      h != null ? h : h = parseInt(prompt("Grid height", w));
+            if (w != null) {
+        w;
+      } else {
+        w = parseInt(prompt("Grid width", 10));
+      };
+            if (h != null) {
+        h;
+      } else {
+        h = parseInt(prompt("Grid height", w));
+      };
       this.graph.add("x1y1");
       _fn = function(x) {};
       _results = [];
-      for (x = 1; (1 <= w ? x <= w : x >= w); (1 <= w ? x += 1 : x -= 1)) {
+      for (x = 1; 1 <= w ? x <= w : x >= w; 1 <= w ? x++ : x--) {
         _fn(x);
         _results.push((function() {
-          var _fn, _results;
-          _fn = function(y) {};
-          _results = [];
-          for (y = 1; (1 <= h ? y <= h : y >= h); (1 <= h ? y += 1 : y -= 1)) {
-            _fn(y);
+          var _fn2, _results2;
+          _fn2 = function(y) {};
+          _results2 = [];
+          for (y = 1; 1 <= h ? y <= h : y >= h; 1 <= h ? y++ : y--) {
+            _fn2(y);
             if (x < w) {
               this.graph.connect("x" + x + "y" + y, "x" + (x + 1) + "y" + y);
             }
-            _results.push(y < h ? this.graph.connect("x" + x + "y" + y, "x" + x + "y" + (y + 1)) : void 0);
+            _results2.push(y < h ? this.graph.connect("x" + x + "y" + y, "x" + x + "y" + (y + 1)) : void 0);
           }
-          return _results;
+          return _results2;
         }).call(this));
       }
       return _results;
@@ -226,37 +245,49 @@
       if (d == null) {
         d = null;
       }
-      w != null ? w : w = parseInt(prompt("Grid width", 10));
-      h != null ? h : h = parseInt(prompt("Grid height", w));
-      d != null ? d : d = parseInt(prompt("Grid depth", w));
+            if (w != null) {
+        w;
+      } else {
+        w = parseInt(prompt("Grid width", 10));
+      };
+            if (h != null) {
+        h;
+      } else {
+        h = parseInt(prompt("Grid height", w));
+      };
+            if (d != null) {
+        d;
+      } else {
+        d = parseInt(prompt("Grid depth", w));
+      };
       _fn = function(x) {};
       _results = [];
-      for (x = 1; (1 <= w ? x <= w : x >= w); (1 <= w ? x += 1 : x -= 1)) {
+      for (x = 1; 1 <= w ? x <= w : x >= w; 1 <= w ? x++ : x--) {
         _fn(x);
         _results.push((function() {
-          var _fn, _results;
-          _fn = function(y) {};
-          _results = [];
-          for (y = 1; (1 <= h ? y <= h : y >= h); (1 <= h ? y += 1 : y -= 1)) {
-            _fn(y);
-            _results.push((function() {
-              var _fn, _results;
-              _fn = function(z) {};
-              _results = [];
-              for (z = 1; (1 <= d ? z <= d : z >= d); (1 <= d ? z += 1 : z -= 1)) {
-                _fn(z);
+          var _fn2, _results2;
+          _fn2 = function(y) {};
+          _results2 = [];
+          for (y = 1; 1 <= h ? y <= h : y >= h; 1 <= h ? y++ : y--) {
+            _fn2(y);
+            _results2.push((function() {
+              var _fn3, _results3;
+              _fn3 = function(z) {};
+              _results3 = [];
+              for (z = 1; 1 <= d ? z <= d : z >= d; 1 <= d ? z++ : z--) {
+                _fn3(z);
                 if (x < w) {
                   this.graph.connect("p" + x + y + z, "p" + (x + 1) + y + z);
                 }
                 if (y < h) {
                   this.graph.connect("p" + x + y + z, "p" + x + (y + 1) + z);
                 }
-                _results.push(z < d ? this.graph.connect("p" + x + y + z, "p" + x + y + (z + 1)) : void 0);
+                _results3.push(z < d ? this.graph.connect("p" + x + y + z, "p" + x + y + (z + 1)) : void 0);
               }
-              return _results;
+              return _results3;
             }).call(this));
           }
-          return _results;
+          return _results2;
         }).call(this));
       }
       return _results;
@@ -277,13 +308,13 @@
         v = c[a];
         _fn(a);
         _results.push((function() {
-          var _i, _len, _results;
-          _results = [];
+          var _i, _len, _results2;
+          _results2 = [];
           for (_i = 0, _len = v.length; _i < _len; _i++) {
             b = v[_i];
-            _results.push(this.graph.connect(a, b));
+            _results2.push(this.graph.connect(a, b));
           }
-          return _results;
+          return _results2;
         }).call(this));
       }
       return _results;
@@ -296,12 +327,16 @@
       if (offset == null) {
         offset = 0;
       }
-      size != null ? size : size = parseInt(prompt("Clique size", 6));
+            if (size != null) {
+        size;
+      } else {
+        size = parseInt(prompt("Clique size", 6));
+      };
       if (size === 1) {
         return true;
       }
-      for (i = 1; (1 <= size ? i <= size : i >= size); (1 <= size ? i += 1 : i -= 1)) {
-        this.graph.connect("a" + (size + offset), "a" + (i + offset));
+      for (i = 1; 1 <= size ? i <= size : i >= size; 1 <= size ? i++ : i--) {
+        this.graph.connect("n" + (size + offset), "n" + (i + offset));
       }
       return this.data_clique(size - 1, offset);
     };
@@ -313,19 +348,48 @@
       if (k == null) {
         k = 2;
       }
-      n != null ? n : n = parseInt(prompt("Set size", 5));
-      k != null ? k : k = parseInt(prompt("Subset size", 2));
+            if (n != null) {
+        n;
+      } else {
+        n = parseInt(prompt("Set size", 5));
+      };
+            if (k != null) {
+        k;
+      } else {
+        k = parseInt(prompt("Subset size", 2));
+      };
       this.graph.subsets = new Subsets();
       s = this.graph.subsets.list(n, k);
       _results = [];
-      for (i = 0, _ref = s.length; (0 <= _ref ? i < _ref : i > _ref); (0 <= _ref ? i += 1 : i -= 1)) {
+      for (i = 0, _ref = s.length; 0 <= _ref ? i < _ref : i > _ref; 0 <= _ref ? i++ : i--) {
         _results.push((function() {
-          var _ref, _ref2, _results;
-          _results = [];
-          for (j = _ref = i + 1, _ref2 = s.length; (_ref <= _ref2 ? j < _ref2 : j > _ref2); (_ref <= _ref2 ? j += 1 : j -= 1)) {
-            _results.push(this.graph.subsets.disjoint(s[i], s[j]) ? this.graph.connect(s[i].join(), s[j].join()) : void 0);
+          var _ref2, _ref3, _results2;
+          _results2 = [];
+          for (j = _ref2 = i + 1, _ref3 = s.length; _ref2 <= _ref3 ? j < _ref3 : j > _ref3; _ref2 <= _ref3 ? j++ : j--) {
+            _results2.push(this.graph.subsets.disjoint(s[i], s[j]) ? this.graph.connect(s[i].join(), s[j].join()) : void 0);
           }
-          return _results;
+          return _results2;
+        }).call(this));
+      }
+      return _results;
+    };
+    Testing.prototype.data_random = function(n, p) {
+      var i, j, _results;
+      if (n == null) {
+        n = 10;
+      }
+      if (p == null) {
+        p = 0.1;
+      }
+      _results = [];
+      for (i = 0; 0 <= n ? i < n : i > n; 0 <= n ? i++ : i--) {
+        _results.push((function() {
+          var _ref, _results2;
+          _results2 = [];
+          for (j = _ref = i + 1; _ref <= n ? j < n : j > n; _ref <= n ? j++ : j--) {
+            _results2.push(Math.random() < p ? this.graph.connect("n" + i, "n" + j) : void 0);
+          }
+          return _results2;
         }).call(this));
       }
       return _results;

@@ -40,14 +40,14 @@
         k = n + 1;
       }
       _results = [];
-      for (ki = 1, _ref = n + 2; (1 <= _ref ? ki <= _ref : ki >= _ref); (1 <= _ref ? ki += 1 : ki -= 1)) {
+      for (ki = 1, _ref = n + 2; 1 <= _ref ? ki <= _ref : ki >= _ref; 1 <= _ref ? ki++ : ki--) {
         _results.push((function() {
-          var _ref, _results;
-          _results = [];
-          for (ni = ki, _ref = n + 2; (ki <= _ref ? ni <= _ref : ni >= _ref); (ki <= _ref ? ni += 1 : ni -= 1)) {
-            _results.push(this.choose(ni, ki));
+          var _ref2, _results2;
+          _results2 = [];
+          for (ni = ki, _ref2 = n + 2; ki <= _ref2 ? ni <= _ref2 : ni >= _ref2; ki <= _ref2 ? ni++ : ni--) {
+            _results2.push(this.choose(ni, ki));
           }
-          return _results;
+          return _results2;
         }).call(this));
       }
       return _results;
@@ -89,8 +89,8 @@
     };
     Subsets.prototype.disjoint = function(a, b) {
       var i, j, _ref, _ref2;
-      for (i = 0, _ref = a.length; (0 <= _ref ? i < _ref : i > _ref); (0 <= _ref ? i += 1 : i -= 1)) {
-        for (j = 0, _ref2 = b.length; (0 <= _ref2 ? j < _ref2 : j > _ref2); (0 <= _ref2 ? j += 1 : j -= 1)) {
+      for (i = 0, _ref = a.length; 0 <= _ref ? i < _ref : i > _ref; 0 <= _ref ? i++ : i--) {
+        for (j = 0, _ref2 = b.length; 0 <= _ref2 ? j < _ref2 : j > _ref2; 0 <= _ref2 ? j++ : j--) {
           if (a[i] === b[j]) {
             return false;
           }

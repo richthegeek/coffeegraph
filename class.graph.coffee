@@ -1,7 +1,4 @@
 class Graph extends EventDriver
-	nodes: []
-	edges: []
-	
 	constructor: ->
 		@format = new Exporters(this)
 		@energy = new Energy(this)
@@ -9,6 +6,8 @@ class Graph extends EventDriver
 		@render = new Render(this)
 		@paused = false
 		@dragging = false
+		@nodes = []
+		@edges = []
 
 	clear: () ->
 		# empty the graph properly (delete rendered elements)

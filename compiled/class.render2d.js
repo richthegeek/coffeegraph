@@ -138,7 +138,11 @@
     };
     Render2D.prototype.draw_edge = function(edge) {
       var _ref;
-      (_ref = edge.element) != null ? _ref : edge.element = this.canvas.path().attr(this.styles.edge);
+            if ((_ref = edge.element) != null) {
+        _ref;
+      } else {
+        edge.element = this.canvas.path().attr(this.styles.edge);
+      };
       return edge;
     };
     Render2D.prototype.delete_node = function(n) {

@@ -9,9 +9,6 @@
     return child;
   };
   Graph = (function() {
-    __extends(Graph, EventDriver);
-    Graph.prototype.nodes = [];
-    Graph.prototype.edges = [];
     function Graph() {
       this.format = new Exporters(this);
       this.energy = new Energy(this);
@@ -19,7 +16,10 @@
       this.render = new Render(this);
       this.paused = false;
       this.dragging = false;
+      this.nodes = [];
+      this.edges = [];
     }
+    __extends(Graph, EventDriver);
     Graph.prototype.clear = function() {
       var n, q, _i, _j, _len, _len2, _ref;
       q = [];
@@ -158,7 +158,11 @@
       if (!(n1 != null) || !(n2 != null)) {
         return;
       }
-      (_ref = this.is_3d) != null ? _ref : this.is_3d = false;
+            if ((_ref = this.is_3d) != null) {
+        _ref;
+      } else {
+        this.is_3d = false;
+      };
       return (this.is_3d ? this.distance_3d : this.distance_2d)(n1, n2);
     };
     Graph.prototype.distance_3d = function(n1, n2, rand) {
